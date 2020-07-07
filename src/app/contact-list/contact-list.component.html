@@ -1,0 +1,73 @@
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h1>Contacts</h1>
+
+        <div class="row">
+            
+        
+
+            <div class="col-md-4">
+                <form (ngSubmit)="onSubmit()">
+                    <div class="form-group">
+                        <label for="name">Search Key</label>
+                        <input type="text" class="form-control" id="search" required [(ngModel)]="search" name="search">
+                    </div>
+                    <button type="submit" class="btn btn-success">Search</button>
+                    <button type="reset" (click)="search='';onSubmit()" class="btn btn-success" style="margin-left: 15px;">Reset</button>
+                </form>
+            </div>
+            <div class="col-md-4" >
+                <form (ngSubmit)="handleFileInput()">
+                    <div class="form-group">
+                        <label for="name">Browse a File</label>
+                        <input type="file" class="form-control" (change)="onChange($event.target.files)" id="search" required name="search">
+                    </div>
+                    <button type="submit" class="btn btn-success">Upload</button>
+                    <button type="reset" (click)="resetFile()" class="btn btn-success" style="margin-left: 15px;">Reset</button>
+                </form>
+            </div>
+            <div class="col-md-4" >
+                <form>
+                    <div class="form-group">
+                        <br>
+                        <button type="submit" (click)="deleteAll()" class="btn btn-danger" style="margin-top: 6px;">Delete All</button>
+                    </div>
+                    
+                </form>
+            </div>
+        </div>
+
+        
+
+    </div><br>
+    <div class="panel-body">
+        <span *ngIf="(contacts | async).length > 0">
+            {{(contacts | async).length}} Rows
+        </span><br>
+        <table *ngIf="(contacts | async).length > 0" class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Firstname</th>
+                    <th>Lastname</th>
+                    <th>Email</th>
+                    <th>Phone Number</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let contact of contacts | async">
+                    <td>{{contact.firstName}}</td>
+                    <td>{{contact.lastName}}</td>
+                    <td>{{contact.email}}</td>
+                    <td>{{contact.phoneNumber}}</td>
+                    <td>
+                            <button (click)="deleteContact(contact.id)" class="btn btn-danger" style="margin-left: 10px">Delete</button>
+                            <button (click)="updareContact(contact)" class="btn btn-info" style="margin-left: 10px">Update</button>
+                            <button (click)="details(contact)" class="btn btn-info" style="margin-left: 10px">Details</button>
+                    
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

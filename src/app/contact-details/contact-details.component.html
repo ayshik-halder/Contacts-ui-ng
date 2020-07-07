@@ -1,0 +1,23 @@
+<div style="width: 400px;">
+        <div class="form-group">
+            <label for="name">First Name</label>
+            <input type="text" class="form-control" id="firstName" required [(ngModel)]="contact.firstName" name="firstName" disabled>
+        </div>
+
+        <div class="form-group">
+            <label for="name">Last Name</label>
+            <input type="text" class="form-control" id="lastName" required [(ngModel)]="contact.lastName" name="lastName" disabled>
+        </div>
+
+        <div class="form-group">
+            <label for="name">Number</label>
+            <input type="number" class="form-control" id="phoneNumber" required [(ngModel)]="contact.phoneNumber" name="phoneNumber" disabled>
+        </div>
+
+        <div class="form-group">
+            <label for="name">Email ID</label>
+            <input type="text" class="form-control" id="email" required [(ngModel)]="contact.email" name="email" disabled>
+        </div>
+
+</div>
+<button (click)="updareContact(contact)" class="btn btn-info" style="margin-left: 10px">Update</button>
