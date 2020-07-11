@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Contact } from '../contact';
 import { ContactsService } from '../contacts.service';
+import { NotificationService } from '../notification.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-create-contact',
@@ -10,26 +12,31 @@ import { ContactsService } from '../contacts.service';
 export class CreateContactComponent implements OnInit {
 
   contact: Contact = new Contact();
-  submitted = false;
-  constructor(private contactsService: ContactsService) { }
+  constructor(private contactsService: ContactsService, private notificationService: NotificationService, private router: Router) { }
 
   ngOnInit(): void {
   }
 
   newContact(): void {
-    this.submitted = false;
     this.contact = new Contact();
   }
 
   save() {
     console.log(this.contact)
     this.contactsService.createContact(this.contact)
-      .subscribe(data => console.log(data), error => console.log(error));
-    this.contact = new Contact();
+      .subscribe(
+      data => {
+        console.log(data);
+        this.notificationService.showSuccess("Success!", "Created!!");
+        this.router.navigateByUrl('details', { state: data });
+      }, 
+      exception => {
+        console.log(exception);
+        this.notificationService.showError("Error!", exception.errorMessage);
+      });
   }
 
   onSubmit() {
-    this.submitted = true;
     this.save();
   }
 }

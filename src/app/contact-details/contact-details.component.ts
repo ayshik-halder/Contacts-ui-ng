@@ -18,8 +18,12 @@ export class ContactDetailsComponent implements OnInit {
   ngOnInit(): void {
     this.state$ = this.activatedRoute.paramMap.pipe(map(() => window.history.state));
     this.state$.subscribe(data => {
-      this.contact = data;
-      console.log(data);
+      if (data.id) {
+        this.contact = data;
+      }
+      else {
+        this.router.navigate(['']);
+      }
     });
   }
 

@@ -4,4 +4,5 @@ export class Contact {
     lastName: string;
     phoneNumber: string;
     email: string;
+    isChecked:boolean;
 }
