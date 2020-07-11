@@ -1,10 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Contact } from '../contact';
-import { Observable, pipe, concat } from 'rxjs';
 import { ContactsService } from '../contacts.service';
-import { async } from '@angular/core/testing';
-import { findIndex } from 'rxjs/operators';
 import { NotificationService } from '../notification.service';
 
 @Component({
@@ -14,6 +11,7 @@ import { NotificationService } from '../notification.service';
 })
 export class ContactListComponent implements OnInit {
 
+  showSpinner: boolean = false;
   isAllChecked: boolean = false;
   count: number = 0;
   file: File;
@@ -25,9 +23,11 @@ export class ContactListComponent implements OnInit {
   ngOnInit(): void {
     this.isAllChecked = false;
     this.reloadData();
+    this.showSpinner = false;
   }
 
   reloadData() {
+    this.showSpinner = true;
     this.contacts$ = [];
     this.contactsService.getAllContact().subscribe(data => {
       data.forEach(d => {
@@ -40,16 +40,24 @@ export class ContactListComponent implements OnInit {
         con.isChecked = false;
         this.contacts$.push(con);
       })
+      this.showSpinner = false;
+    }, error => {
+      this.showSpinner = false;
     });
   }
 
   deleteContact(id: number) {
+    this.showSpinner = true;
     this.contactsService.deleteContact(id)
       .subscribe(
         data => {
           this.reloadData();
+          this.showSpinner = false;
         },
-        error => console.log(error));
+        error => {
+          console.log(error);
+          this.showSpinner = false;
+        });
   }
 
   updareContact(contact: Contact) {
@@ -61,6 +69,7 @@ export class ContactListComponent implements OnInit {
   }
 
   onSubmit() {
+    this.showSpinner = true;
     this.contacts$ = [];
       if (this.search == "" || this.search == undefined) {
         this.reloadData();
@@ -78,6 +87,9 @@ export class ContactListComponent implements OnInit {
             console.log(con);
             this.contacts$.push(con);
           })
+          this.showSpinner = false;
+        }, error => {
+          this.showSpinner = false;
         });
       }
   }
@@ -97,6 +109,7 @@ export class ContactListComponent implements OnInit {
   }
 
   deleteAll() {
+    this.showSpinner = true;
       if (this.isAllChecked) {
         if (confirm('Are you sure you want to delete all the contacts from database?'))
       this.contactsService.deleteAll().subscribe(data=>{
@@ -112,14 +125,17 @@ export class ContactListComponent implements OnInit {
         console.log(ids);
         if (ids.length == 0) {
           this.notificationService.showWarning("", "Please select at least one row to delete.");
+          this.showSpinner = false;
         } else {
           if (confirm('Are you sure you want to delete all the contacts from database?'))
           this.contactsService.deleteMultiple(ids).subscribe(data => {
             this.notificationService.showSuccess("Success!", "Deleted!!");
             this.reloadData();
+            this.showSpinner = false;
           }, ex => {
             this.notificationService.showError("Error!", ex.errorMessage);
             this.reloadData();
+            this.showSpinner = false;
           });
         }
       }
@@ -145,7 +161,7 @@ export class ContactListComponent implements OnInit {
 
 
   downloadFile(filename: string = 'data') {
-
+    filename = new Date().toLocaleString();
     let toExportFile: Array<Contact> = [];
     this.contacts$.forEach(con => {
       if(con.isChecked)

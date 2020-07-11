@@ -51,7 +51,7 @@
         </div>
 
     </div><br>
-    <div class="panel-body">
+    <div *ngIf="!showSpinner" class="panel-body">
         <span *ngIf="(contacts$)?.length > 0">
             {{(contacts$)?.length}} Rows
         </span><br>
@@ -110,4 +110,9 @@
         </div>
 
     </div>
+</div>
+<div *ngIf="showSpinner" class="spinner-border text-info"
+             role="status"
+             style="height:5rem; width:5rem;">
+            <span class="sr-only">Loading</span>
 </div>
