@@ -68,8 +68,48 @@ export class ContactListComponent implements OnInit {
   }
 
   deleteAll() {
+    if (confirm('Are you sure you want to delete all the contacts from database?'))
     this.contactsService.deleteAll().subscribe(data=>{
       this.reloadData();
     });
+  }
+
+  ConvertToCSV(objArray, headerList) {
+    let array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
+    let str = '';
+    let row = 'S.No,';
+    row += 'Given Name,Family Name,E-mail 1 - Value,Phone 1 - Value,';
+    row = row.slice(0, -1);
+    str += row + '\r\n';
+    for (let i = 0; i < array.length; i++) {
+        let line = (i + 1) + '';
+        for (let index in headerList) {
+            let head = headerList[index];
+            line += ',' + array[i][head];
+        }
+        str += line + '\r\n';
+    }
+    return str;
+  }
+
+  downloadFile(filename: string = 'data') {
+    this.contacts.subscribe(data => {
+      let csvData = this.ConvertToCSV(data, [
+        'firstName', 'lastName', 'email', 'phoneNumber']);
+      console.log(csvData)
+      let blob = new Blob(['\ufeff' + csvData], {
+        type: 'text/csv;charset=utf-8;'
+    });
+      let dwldLink = document.createElement("a");
+      let url = URL.createObjectURL(blob);
+      navigator.userAgent.indexOf('Chrome') == -1;
+      dwldLink.setAttribute("href", url);
+      dwldLink.setAttribute("download", filename + ".csv");
+      dwldLink.style.visibility = "hidden";
+      document.body.appendChild(dwldLink);
+      dwldLink.click();
+      document.body.removeChild(dwldLink);
+      }
+    );
   }
 }

@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
 import { Contact } from './contact';
+import { catchError } from 'rxjs/operators';
 
 
 @Injectable({
@@ -16,7 +17,10 @@ export class ContactsService {
   constructor(private http: HttpClient) { }
 
   getContact(id: number): Observable<Contact> {
-    return this.http.get<Contact>(`${this.ayshikControllerBaseUrl}/getContact/${id}`);
+    return this.http.get<Contact>(`${this.ayshikControllerBaseUrl}/getContact/${id}`).pipe(
+      catchError((err) => {
+        return throwError(err.error);
+      }));;
   }
 
   getAllContact(): Observable<Array<Contact>> {
@@ -24,15 +28,24 @@ export class ContactsService {
   }
 
   deleteContact(id: number): Observable<any> {
-    return this.http.delete<any>(`${this.ayshikControllerBaseUrl}/deleteContact/${id}`);
+    return this.http.delete<any>(`${this.ayshikControllerBaseUrl}/deleteContact/${id}`).pipe(
+      catchError((err) => {
+        return throwError(err.error);
+      }));;
   }
 
   createContact(contact: Contact): Observable<Contact> {
-    return this.http.post<Contact>(`${this.ayshikControllerBaseUrl}/addContact/`, contact);
+    return this.http.post<Contact>(`${this.ayshikControllerBaseUrl}/addContact/`, contact).pipe(
+      catchError((err) => {
+        return throwError(err.error);
+      }));
   }
 
   updateContact(contact: Contact): Observable<Contact> {
-    return this.http.put<Contact>(`${this.ayshikControllerBaseUrl}/updateContact/`, contact);
+    return this.http.put<Contact>(`${this.ayshikControllerBaseUrl}/updateContact/`, contact).pipe(
+      catchError((err) => {
+        return throwError(err.error);
+      }));;
   }
 
   searchContact(searchKey: string): Observable<Array<Contact>> {
@@ -43,10 +56,16 @@ export class ContactsService {
   
     let formData = new FormData();
         formData.append("file", file);
-    return this.http.post<Array<Contact>>(`${this.ayshikControllerBaseUrl}/upload`, formData);
+    return this.http.post<Array<Contact>>(`${this.ayshikControllerBaseUrl}/upload`, formData).pipe(
+      catchError((err) => {
+        return throwError(err.error);
+      }));;
   }
 
   deleteAll() {
-    return this.http.delete(`${this.ayshikControllerBaseUrl}/deleteAllTemp`);
+    return this.http.delete(`${this.ayshikControllerBaseUrl}/deleteAllTemp`).pipe(
+      catchError((err) => {
+        return throwError(err.error);
+      }));;
   }
 }
