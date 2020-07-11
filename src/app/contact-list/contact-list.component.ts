@@ -4,6 +4,8 @@ import { Contact } from '../contact';
 import { Observable, pipe, concat } from 'rxjs';
 import { ContactsService } from '../contacts.service';
 import { async } from '@angular/core/testing';
+import { findIndex } from 'rxjs/operators';
+import { NotificationService } from '../notification.service';
 
 @Component({
   selector: 'app-contact-list',
@@ -12,19 +14,33 @@ import { async } from '@angular/core/testing';
 })
 export class ContactListComponent implements OnInit {
 
+  isAllChecked: boolean = false;
   count: number = 0;
   file: File;
-  contacts: Observable<Contact[]>;
+  contacts$: Contact[] = [];
   search: string = "";
 
-  constructor(private router: Router, private contactsService: ContactsService) { }
+  constructor(private router: Router, private contactsService: ContactsService, private notificationService: NotificationService) { }
 
   ngOnInit(): void {
+    this.isAllChecked = false;
     this.reloadData();
   }
 
   reloadData() {
-    this.contacts = this.contactsService.getAllContact();
+    this.contacts$ = [];
+    this.contactsService.getAllContact().subscribe(data => {
+      data.forEach(d => {
+        var con: Contact = new Contact();
+        con.id = d.id;
+        con.firstName = d.firstName;
+        con.lastName = d.lastName;
+        con.phoneNumber = d.phoneNumber;
+        con.email = d.email;
+        con.isChecked = false;
+        this.contacts$.push(con);
+      })
+    });
   }
 
   deleteContact(id: number) {
@@ -45,11 +61,24 @@ export class ContactListComponent implements OnInit {
   }
 
   onSubmit() {
+    this.contacts$ = [];
       if (this.search == "" || this.search == undefined) {
         this.reloadData();
       }
       else {
-        this.contacts = this.contactsService.searchContact(this.search);
+        this.contactsService.searchContact(this.search).subscribe( data => {
+          data.forEach(d => {
+            var con: Contact = new Contact();
+            con.id = d.id;
+            con.firstName = d.firstName;
+            con.lastName = d.lastName;
+            con.phoneNumber = d.phoneNumber;
+            con.email = d.email;
+            con.isChecked = false;
+            console.log(con);
+            this.contacts$.push(con);
+          })
+        });
       }
   }
 
@@ -68,10 +97,32 @@ export class ContactListComponent implements OnInit {
   }
 
   deleteAll() {
-    if (confirm('Are you sure you want to delete all the contacts from database?'))
-    this.contactsService.deleteAll().subscribe(data=>{
-      this.reloadData();
-    });
+      if (this.isAllChecked) {
+        if (confirm('Are you sure you want to delete all the contacts from database?'))
+      this.contactsService.deleteAll().subscribe(data=>{
+        this.isAllChecked = false;
+        this.reloadData();
+      });
+      } else {
+        let ids: Array<number> = [];
+        this.contacts$.forEach(con => {
+          if(con.isChecked)
+            ids.push(con.id);
+        });
+        console.log(ids);
+        if (ids.length == 0) {
+          this.notificationService.showWarning("", "Please select at least one row to delete.");
+        } else {
+          if (confirm('Are you sure you want to delete all the contacts from database?'))
+          this.contactsService.deleteMultiple(ids).subscribe(data => {
+            this.notificationService.showSuccess("Success!", "Deleted!!");
+            this.reloadData();
+          }, ex => {
+            this.notificationService.showError("Error!", ex.errorMessage);
+            this.reloadData();
+          });
+        }
+      }
   }
 
   ConvertToCSV(objArray, headerList) {
@@ -92,9 +143,16 @@ export class ContactListComponent implements OnInit {
     return str;
   }
 
+
   downloadFile(filename: string = 'data') {
-    this.contacts.subscribe(data => {
-      let csvData = this.ConvertToCSV(data, [
+
+    let toExportFile: Array<Contact> = [];
+    this.contacts$.forEach(con => {
+      if(con.isChecked)
+        toExportFile.push(con);
+    });
+    if (toExportFile.length > 0) {
+      let csvData = this.ConvertToCSV(toExportFile, [
         'firstName', 'lastName', 'email', 'phoneNumber']);
       console.log(csvData)
       let blob = new Blob(['\ufeff' + csvData], {
@@ -109,7 +167,31 @@ export class ContactListComponent implements OnInit {
       document.body.appendChild(dwldLink);
       dwldLink.click();
       document.body.removeChild(dwldLink);
+      this.notificationService.showSuccess("Success!", "Downloaded!!");
+    } else {
+      this.notificationService.showWarning("", "Please select at least one row to delete.");
+    }
+  }
+
+  checkedAll() {
+        for(var con in this.contacts$) {
+          this.contacts$[con].isChecked = this.isAllChecked;
+        }
+  }
+
+  addOrRemove(contact: Contact) {
+    console.log(contact);
+    if(!contact.isChecked) this.isAllChecked = false;
+    var allTrue = true;
+    this.contacts$.forEach(data => {
+      if(!data.isChecked) {
+        allTrue = false;
       }
-    );
+    })
+    if(allTrue) this.isAllChecked = true;
+  }
+
+  arrayRemove(arr, value) { 
+    return arr.filter(ele => { ele != value });
   }
 }

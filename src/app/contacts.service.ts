@@ -68,4 +68,15 @@ export class ContactsService {
         return throwError(err.error);
       }));;
   }
+
+  deleteMultiple(contactIds: Array<number>) {
+    let params = new HttpParams()
+    contactIds.forEach(id => {
+      params = params.append('contactIds', id+'')
+    });
+    return this.http.delete(`${this.ayshikControllerBaseUrl}/deleteMultiple`, {params}).pipe(
+      catchError((err) => {
+        return throwError(err.error);
+      }));;
+  }
 }
