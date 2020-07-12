@@ -11,7 +11,7 @@ import { NotificationService } from '../notification.service';
 })
 export class ContactListComponent implements OnInit {
 
-  showSpinner: boolean = false;
+  showSpinner: boolean = true;
   isAllChecked: boolean = false;
   count: number = 0;
   file: File;
@@ -21,9 +21,9 @@ export class ContactListComponent implements OnInit {
   constructor(private router: Router, private contactsService: ContactsService, private notificationService: NotificationService) { }
 
   ngOnInit(): void {
+    this.showSpinner = true;
     this.isAllChecked = false;
     this.reloadData();
-    this.showSpinner = false;
   }
 
   reloadData() {
@@ -52,11 +52,11 @@ export class ContactListComponent implements OnInit {
       .subscribe(
         data => {
           this.reloadData();
-          this.showSpinner = false;
         },
-        error => {
-          console.log(error);
+        ex => {
+          this.notificationService.showError("Error!", ex.errorMessage);
           this.showSpinner = false;
+          this.reloadData();
         });
   }
 
@@ -96,10 +96,18 @@ export class ContactListComponent implements OnInit {
 
   handleFileInput() {
     // this.fileToUpload = files.item(0);
-    if (this.file != undefined)
-    this.contactsService.upload(this.file).subscribe(data => {
-      this.reloadData();
-    });
+    this.showSpinner = true;
+    if (this.file != undefined) {
+      this.contactsService.upload(this.file).subscribe(data => {
+        this.reloadData();
+      }, ex => {
+        this.notificationService.showError("Error!", ex.errorMessage);
+        this.showSpinner = false;
+      });
+    } else {
+      this.notificationService.showWarning("", "Please browse a file.");
+      this.showSpinner = false;
+    }
   }
   onChange(files: FileList) {
     this.file = files[0];
@@ -110,35 +118,11 @@ export class ContactListComponent implements OnInit {
 
   deleteAll() {
     this.showSpinner = true;
-      if (this.isAllChecked) {
         if (confirm('Are you sure you want to delete all the contacts from database?'))
       this.contactsService.deleteAll().subscribe(data=>{
         this.isAllChecked = false;
         this.reloadData();
       });
-      } else {
-        let ids: Array<number> = [];
-        this.contacts$.forEach(con => {
-          if(con.isChecked)
-            ids.push(con.id);
-        });
-        console.log(ids);
-        if (ids.length == 0) {
-          this.notificationService.showWarning("", "Please select at least one row to delete.");
-          this.showSpinner = false;
-        } else {
-          if (confirm('Are you sure you want to delete all the contacts from database?'))
-          this.contactsService.deleteMultiple(ids).subscribe(data => {
-            this.notificationService.showSuccess("Success!", "Deleted!!");
-            this.reloadData();
-            this.showSpinner = false;
-          }, ex => {
-            this.notificationService.showError("Error!", ex.errorMessage);
-            this.reloadData();
-            this.showSpinner = false;
-          });
-        }
-      }
   }
 
   ConvertToCSV(objArray, headerList) {

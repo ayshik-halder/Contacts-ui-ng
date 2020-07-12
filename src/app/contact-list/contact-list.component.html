@@ -35,7 +35,7 @@
                     <form>
                         <div class="form-group">
                             <br>
-                            <button type="submit" (click)="deleteAll()" class="btn btn-danger" style="margin-top: 6px;">Delete Selected</button>
+                            <button type="submit" (click)="deleteAll()" class="btn btn-danger" style="margin-top: 6px;">Delete All</button>
                         </div>
                     </form>
                 </div>
@@ -51,7 +51,7 @@
         </div>
 
     </div><br>
-    <div *ngIf="!showSpinner" class="panel-body">
+    <div *ngIf="!showSpinner" class="panel-body scroll-auto">
         <span *ngIf="(contacts$)?.length > 0">
             {{(contacts$)?.length}} Rows
         </span><br>
@@ -79,9 +79,9 @@
                     <td>{{contact.email}}</td>
                     <td>{{contact.phoneNumber}}</td>
                     <td>
-                            <button (click)="deleteContact(contact.id)" class="btn btn-danger" style="margin-left: 5px">Delete</button>
-                            <button (click)="updareContact(contact)" class="btn btn-info" style="margin-left: 5px">Update</button>
-                            <button (click)="details(contact)" class="btn btn-info" style="margin-left: 5px">Details</button>
+                        <button (click)="deleteContact(contact.id)" class="btn btn-danger btn-sm" style="margin-left: 5px"><i class="fas fa-trash"></i></button>
+                        <button (click)="updareContact(contact)" class="btn btn-info btn-sm" style="margin-left: 5px"><i class="fas fa-edit"></i></button>
+                        <button (click)="details(contact)" class="btn btn-info btn-sm" style="margin-left: 5px"><i class="fas fa-bars"></i></button>
                     
                     </td>
                 </tr>
@@ -108,11 +108,12 @@
                 </div>
             </div>
         </div>
-
     </div>
 </div>
-<div *ngIf="showSpinner" class="spinner-border text-info"
-             role="status"
-             style="height:5rem; width:5rem;">
+    <div class="d-flex align-items-center justify-content-center" style="height: 350px">
+        <div *ngIf="showSpinner" class="spinner-grow text-info"
+            role="status"
+            style="height:5rem; width:5rem;">
             <span class="sr-only">Loading</span>
-</div>
+        </div>
+    </div>
