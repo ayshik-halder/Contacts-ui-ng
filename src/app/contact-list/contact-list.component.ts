@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Contact } from '../contact';
 import { ContactsService } from '../contacts.service';
 import { NotificationService } from '../notification.service';
+import { ContactModel } from '../ContactModel';
 
 @Component({
   selector: 'app-contact-list',
@@ -15,7 +15,7 @@ export class ContactListComponent implements OnInit {
   isAllChecked: boolean = false;
   count: number = 0;
   file: File;
-  contacts$: Contact[] = [];
+  contacts$: ContactModel[] = [];
   search: string = "";
 
   constructor(private router: Router, private contactsService: ContactsService, private notificationService: NotificationService) { }
@@ -31,8 +31,8 @@ export class ContactListComponent implements OnInit {
     this.contacts$ = [];
     this.contactsService.getAllContact().subscribe(data => {
       data.forEach(d => {
-        var con: Contact = new Contact();
-        con.id = d.id;
+        var con: ContactModel = new ContactModel();
+        con.contactId = d.contactId;
         con.firstName = d.firstName;
         con.lastName = d.lastName;
         con.phoneNumber = d.phoneNumber;
@@ -51,6 +51,7 @@ export class ContactListComponent implements OnInit {
     this.contactsService.deleteContact(id)
       .subscribe(
         data => {
+          this.notificationService.showError("Success!", "Deleted");
           this.reloadData();
         },
         ex => {
@@ -60,11 +61,11 @@ export class ContactListComponent implements OnInit {
         });
   }
 
-  updareContact(contact: Contact) {
+  updareContact(contact: ContactModel) {
     this.router.navigateByUrl('update', { state: contact });
   }
 
-  details(contact: Contact) {
+  details(contact: ContactModel) {
     this.router.navigateByUrl('details', { state: contact });
   }
 
@@ -77,8 +78,8 @@ export class ContactListComponent implements OnInit {
       else {
         this.contactsService.searchContact(this.search).subscribe( data => {
           data.forEach(d => {
-            var con: Contact = new Contact();
-            con.id = d.id;
+            var con: ContactModel = new ContactModel();
+            con.contactId = d.contactId;
             con.firstName = d.firstName;
             con.lastName = d.lastName;
             con.phoneNumber = d.phoneNumber;
@@ -118,11 +119,13 @@ export class ContactListComponent implements OnInit {
 
   deleteAll() {
     this.showSpinner = true;
-        if (confirm('Are you sure you want to delete all the contacts from database?'))
-      this.contactsService.deleteAll().subscribe(data=>{
-        this.isAllChecked = false;
-        this.reloadData();
-      });
+        if (confirm('Are you sure you want to delete all the contacts from database?')) {
+          this.contactsService.deleteAll().subscribe(data=>{
+            this.isAllChecked = false;
+            this.reloadData();
+          });
+        } else 
+        this.showSpinner = false;
   }
 
   ConvertToCSV(objArray, headerList) {
@@ -146,7 +149,7 @@ export class ContactListComponent implements OnInit {
 
   downloadFile(filename: string = 'data') {
     filename = new Date().toLocaleString();
-    let toExportFile: Array<Contact> = [];
+    let toExportFile: Array<ContactModel> = [];
     this.contacts$.forEach(con => {
       if(con.isChecked)
         toExportFile.push(con);
@@ -179,7 +182,7 @@ export class ContactListComponent implements OnInit {
         }
   }
 
-  addOrRemove(contact: Contact) {
+  addOrRemove(contact: ContactModel) {
     console.log(contact);
     if(!contact.isChecked) this.isAllChecked = false;
     var allTrue = true;

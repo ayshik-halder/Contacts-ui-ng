@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { Contact } from './contact';
+import { ContactModel } from './ContactModel';
 import { catchError } from 'rxjs/operators';
 
 
@@ -16,15 +16,15 @@ export class ContactsService {
 
   constructor(private http: HttpClient) { }
 
-  getContact(id: number): Observable<Contact> {
-    return this.http.get<Contact>(`${this.ayshikControllerBaseUrl}/getContact/${id}`).pipe(
+  getContact(id: number): Observable<ContactModel> {
+    return this.http.get<ContactModel>(`${this.ayshikControllerBaseUrl}/getContact/${id}`).pipe(
       catchError((err) => {
         return throwError(err.error);
       }));;
   }
 
-  getAllContact(): Observable<Array<Contact>> {
-    return this.http.get<Array<Contact>>(`${this.ayshikControllerBaseUrl}/getAllContacts`);
+  getAllContact(): Observable<Array<ContactModel>> {
+    return this.http.get<Array<ContactModel>>(`${this.ayshikControllerBaseUrl}/getAllContacts`);
   }
 
   deleteContact(id: number): Observable<any> {
@@ -34,29 +34,29 @@ export class ContactsService {
       }));;
   }
 
-  createContact(contact: Contact): Observable<Contact> {
-    return this.http.post<Contact>(`${this.ayshikControllerBaseUrl}/addContact/`, contact).pipe(
+  createContact(contact: ContactModel): Observable<ContactModel> {
+    return this.http.post<ContactModel>(`${this.ayshikControllerBaseUrl}/addContact/`, contact).pipe(
       catchError((err) => {
         return throwError(err.error);
       }));
   }
 
-  updateContact(contact: Contact): Observable<Contact> {
-    return this.http.put<Contact>(`${this.ayshikControllerBaseUrl}/updateContact/`, contact).pipe(
+  updateContact(contact: ContactModel): Observable<ContactModel> {
+    return this.http.put<ContactModel>(`${this.ayshikControllerBaseUrl}/updateContact/`, contact).pipe(
       catchError((err) => {
         return throwError(err.error);
       }));;
   }
 
-  searchContact(searchKey: string): Observable<Array<Contact>> {
-    return this.http.get<Array<Contact>>(`${this.ayshikControllerBaseUrl}/search?value=${searchKey}`);
+  searchContact(searchKey: string): Observable<Array<ContactModel>> {
+    return this.http.get<Array<ContactModel>>(`${this.ayshikControllerBaseUrl}/search?value=${searchKey}`);
   }
 
-  upload(file: File): Observable<Array<Contact>> {
+  upload(file: File): Observable<Array<ContactModel>> {
   
     let formData = new FormData();
         formData.append("file", file);
-    return this.http.post<Array<Contact>>(`${this.ayshikControllerBaseUrl}/upload`, formData).pipe(
+    return this.http.post<Array<ContactModel>>(`${this.ayshikControllerBaseUrl}/upload`, formData).pipe(
       catchError((err) => {
         return throwError(err.error);
       }));;
@@ -64,17 +64,6 @@ export class ContactsService {
 
   deleteAll() {
     return this.http.delete(`${this.ayshikControllerBaseUrl}/deleteAllTemp`).pipe(
-      catchError((err) => {
-        return throwError(err.error);
-      }));;
-  }
-
-  deleteMultiple(contactIds: Array<number>) {
-    let params = new HttpParams()
-    contactIds.forEach(id => {
-      params = params.append('contactIds', id+'')
-    });
-    return this.http.delete(`${this.ayshikControllerBaseUrl}/deleteMultiple`, {params}).pipe(
       catchError((err) => {
         return throwError(err.error);
       }));;

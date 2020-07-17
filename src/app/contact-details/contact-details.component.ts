@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Contact } from '../contact';
+import { ContactModel } from '../ContactModel';
 import { ActivatedRoute, Router } from '@angular/router';
 import { map } from 'rxjs/operators';
 
@@ -11,14 +11,14 @@ import { map } from 'rxjs/operators';
 })
 export class ContactDetailsComponent implements OnInit {
 
-  state$: Observable<Contact>;
-  contact: Contact = new Contact();
+  state$: Observable<ContactModel>;
+  contact: ContactModel = new ContactModel();
   constructor(private activatedRoute: ActivatedRoute, private router: Router) { }
 
   ngOnInit(): void {
     this.state$ = this.activatedRoute.paramMap.pipe(map(() => window.history.state));
     this.state$.subscribe(data => {
-      if (data.id) {
+      if (data.contactId) {
         this.contact = data;
       }
       else {
@@ -27,7 +27,7 @@ export class ContactDetailsComponent implements OnInit {
     });
   }
 
-  updareContact(contact: Contact) {
+  updareContact(contact: ContactModel) {
     this.router.navigateByUrl('update', { state: contact });
   }
  

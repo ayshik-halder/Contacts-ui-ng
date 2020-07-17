@@ -10,13 +10,19 @@
         </div>
 
         <div class="form-group">
-            <label for="phoneNumber">Number</label>
-            <input type="number" class="form-control" id="phoneNumber" required [(ngModel)]="contact.phoneNumber" name="phoneNumber" disabled>
-        </div>
-
-        <div class="form-group">
             <label for="email">Email ID</label>
             <input type="text" class="form-control" id="email" required [(ngModel)]="contact.email" name="email" disabled>
+        </div>
+
+        <div *ngFor="let phone of contact.phoneNumber">
+            <div class="form-group">
+                <label>Number Type</label>
+                <input type="text" class="form-control"  required [(ngModel)]="phone.phoneNumberType" disabled>
+            </div>
+            <div class="form-group">
+                <label>Number</label>
+                <input type="text" class="form-control"  required [(ngModel)]="phone.phoneNumber" disabled>
+            </div>
         </div>
 
 </div>
