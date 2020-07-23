@@ -59,8 +59,7 @@
             <thead>
                 <tr>
                     <th>
-                        <label for="checkbox">Select All</label><br>
-                        <input type="checkbox" name="checkbox" [(ngModel)]="isAllChecked" (change)="checkedAll()">
+                        <input type="checkbox" name="checkbox" [(ngModel)]="isAllChecked" (change)="checkedAll()">  All
                     </th>
                     <th>Firstname</th>
                     <th>Lastname</th>
@@ -84,6 +83,17 @@
                     </td>
                 </tr>
             </tbody>
+            <thead>
+                <tr>
+                    <th>
+                        <input type="checkbox" name="checkbox" [(ngModel)]="isAllChecked" (change)="checkedAll()"> All
+                    </th>
+                    <th>Firstname</th>
+                    <th>Lastname</th>
+                    <th>Email</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
         </table>
 
         <div *ngIf="(contacts$)?.length > 0">

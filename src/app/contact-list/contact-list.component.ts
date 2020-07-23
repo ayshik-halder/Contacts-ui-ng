@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { ContactsService } from '../contacts.service';
 import { NotificationService } from '../notification.service';
 import { ContactModel } from '../ContactModel';
+import { SimplifiedContact } from '../SimplifiedContact';
 
 @Component({
   selector: 'app-contact-list',
@@ -121,8 +122,12 @@ export class ContactListComponent implements OnInit {
     this.showSpinner = true;
         if (confirm('Are you sure you want to delete all the contacts from database?')) {
           this.contactsService.deleteAll().subscribe(data=>{
+            this.notificationService.showWarning("Success!", "Deleted");
             this.isAllChecked = false;
             this.reloadData();
+          }, ex => {
+            this.notificationService.showError("Error!", ex.errorMessage);
+            this.showSpinner = false;
           });
         } else 
         this.showSpinner = false;
@@ -132,14 +137,14 @@ export class ContactListComponent implements OnInit {
     let array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
     let str = '';
     let row = 'S.No,';
-    row += 'Given Name,Family Name,E-mail 1 - Value,Phone 1 - Value,';
+    row += 'Given Name,Family Name,E-mail 1 - Value,Phone 1 - Type,Phone 1 - Value,Phone 2 - Type,Phone 2 - Value,';
     row = row.slice(0, -1);
     str += row + '\r\n';
     for (let i = 0; i < array.length; i++) {
         let line = (i + 1) + '';
         for (let index in headerList) {
             let head = headerList[index];
-            line += ',' + array[i][head];
+            line += array[i][head] ? ',' + array[i][head] : ',';
         }
         str += line + '\r\n';
     }
@@ -149,14 +154,37 @@ export class ContactListComponent implements OnInit {
 
   downloadFile(filename: string = 'data') {
     filename = new Date().toLocaleString();
-    let toExportFile: Array<ContactModel> = [];
+    let toExportFile: Array<SimplifiedContact> = [];
     this.contacts$.forEach(con => {
-      if(con.isChecked)
-        toExportFile.push(con);
+      if(con.isChecked) {
+
+        let simplifiedContact: SimplifiedContact = new SimplifiedContact();
+        simplifiedContact.firstName = con.firstName;
+        simplifiedContact.lastName = con.lastName;
+        simplifiedContact.email = con.email;
+
+        con.phoneNumber.forEach(numberElement => {
+
+          if(numberElement.phoneNumberType == 'Mobile') {
+            simplifiedContact.mobileNumberType = 'Mobile';
+            simplifiedContact.mobileNumber += numberElement.phoneNumber ? ':::' + numberElement.phoneNumber : '';
+          }
+
+          if(numberElement.phoneNumberType == 'Work') {
+            console.log(numberElement.phoneNumberType);
+            simplifiedContact.workNumberType = 'Work';
+            simplifiedContact.workNumber += numberElement.phoneNumber ? ':::' + numberElement.phoneNumber : '';
+          }
+        })
+
+        simplifiedContact.mobileNumber = simplifiedContact.mobileNumber ? simplifiedContact.mobileNumber.substring(3) : simplifiedContact.mobileNumber;
+        simplifiedContact.workNumber = simplifiedContact.workNumber ? simplifiedContact.workNumber.substring(3) : simplifiedContact.workNumber;
+        toExportFile.push(simplifiedContact);
+      }
     });
     if (toExportFile.length > 0) {
       let csvData = this.ConvertToCSV(toExportFile, [
-        'firstName', 'lastName', 'email', 'phoneNumber']);
+        'firstName', 'lastName', 'email', 'mobileNumberType', 'mobileNumber', 'workNumberType', 'workNumber']);
       console.log(csvData)
       let blob = new Blob(['\ufeff' + csvData], {
         type: 'text/csv;charset=utf-8;'
